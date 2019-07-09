@@ -19,17 +19,19 @@ export class SuperAdmin extends User {
     }
 
     createGameMachine(index, number) {
-        if ((this.money -= number) > 0) {
-            this.money -= number
-            this.casinos[index].machines.push(new GameMachine(number))
+        if (this.money === 0) {
+            throw 'Not enough money to create machine';
+        } else if ((this.money - number) < 0) {
+            //TODO: notification
+            throw 'Not enough mouney to create machine. Would you like to take the ramaining amount?'
         } else {
-            throw "Not enough money to create game machine"
+            this.casinos[index].machines.push(new GameMachine(number));
         }
     }
 
     getCasinoMoney(index, number) {
         let result = 0;
-        if (index === 0 || typeof (index) === "undefined" || typeof (index) !== "number") {
+        if (index === 0 || typeof (index) === "undefined" || isNaN(index)) {
             throw 'Not valid number of game machine';
         }
 
@@ -41,19 +43,24 @@ export class SuperAdmin extends User {
             })
 
             for (const i of sortedMachines) {
-                i.number -= number
-                result += number;
+                //take all remaining amount if number argument bigger
+                if ((i.number - number) < 0) {
+                    i.number -= i.getMoney;
+                    result += i.getMoney;
+                } else {
+                    i.number -= number;
+                    result += number;
+                }
             }
             return result;
         }
     }
 
-    addCasinoMoney(number) {
-
-    }
+    //TODO
+    addCasinoMoney(index, number) {}
 
     deleteMachine(index) {
-        if (index === 0 || typeof (index) === "undefined" || typeof (index) !== "number") {
+        if (index === 0 || typeof (index) === "undefined" || isNaN(index)) {
             throw 'Not valid number of game machine';
         }
 
@@ -67,7 +74,7 @@ export class SuperAdmin extends User {
 
             gameMachines[index - 1].takeMachineMoney(moneyAmount);
 
-            //human counts from 1 
+            //count from 1 
             gameMachines.splice(index - 1, 1);
             //split money among the rest of machines
             for (const machine of gameMachines) {

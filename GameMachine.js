@@ -7,10 +7,8 @@ export class GameMachine {
         return this.number;
     }
 
-    takeMoney(number) {
-        if (this.number === 0) {
-            throw 'No money on this machine';
-        } else if ((this.number -= number) < 0) {
+    takeMachineMoney(number) {
+        if ((this.number - number) < 0) {
             //TODO: notification that amount to be taken larger
             this.number -= this.getMoney;
         } else {
@@ -30,7 +28,7 @@ export class GameMachine {
         for (let i = 0; i < 3; i++) {
             resultArray.push(Math.floor(Math.random() * 10));
         }
-
+        console.log(resultArray);
         //for test
         // resultArray = [7, 7, 7];
         //count occurence of each number in array 
