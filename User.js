@@ -1,7 +1,4 @@
 export class User {
-    name;
-    money;
-
     constructor(name, money) {
         this.name = name;
         this.money = money;
@@ -10,5 +7,4 @@ export class User {
     play(money) {
 
     }
-
 }

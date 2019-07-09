@@ -1,9 +1,9 @@
 import {
     User
-} from './User';
+} from './User.js';
 import {
     GameMachine
-} from './GameMachine';
+} from './GameMachine.js';
 import {
     Casino
-} from './Casino';
+} from './Casino.js';
