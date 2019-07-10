@@ -70,7 +70,7 @@ export class SuperAdmin extends User {
     }
   }
 
-  deleteMachine(index) {
+  deleteMachine(index, casinoName) {
     if (index === 0 || isNaN(index)) {
       throw new Error("Not valid number of game machine");
     }
