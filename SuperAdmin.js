@@ -23,7 +23,7 @@ export class SuperAdmin extends User {
             throw 'Not enough money to create machine';
         } else if ((this.money - number) < 0) {
             //TODO: notification
-            throw 'Not enough mouney to create machine. Would you like to take the ramaining amount?'
+            throw 'Not enough money to create machine.'
         } else {
             this.casinos[index].machines.push(new GameMachine(number));
         }
@@ -57,7 +57,9 @@ export class SuperAdmin extends User {
     }
 
     //TODO
-    addCasinoMoney(index, number) {}
+    addCasinoMoney(index, number) {
+
+    }
 
     deleteMachine(index) {
         if (index === 0 || typeof (index) === "undefined" || isNaN(index)) {
