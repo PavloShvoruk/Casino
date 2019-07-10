@@ -1,87 +1,103 @@
-import {
-    Casino
-} from './Casino.js';
-import {
-    GameMachine
-} from './GameMachine.js';
-import {
-    User
-} from './User.js';
+import { Casino } from "./Casino.js";
+import { GameMachine } from "./GameMachine.js";
+import { User } from "./User.js";
+import { findCasino, findMachine } from "./Helpers.js";
 
 export class SuperAdmin extends User {
-    constructor(name, money) {
-        super(name, money);
-        this.casinos = [];
+  constructor(name, money) {
+    super(name, money);
+    this.casinos = [];
+  }
+
+  createCasino(name) {
+    this.casinos.push(new Casino(name));
+  }
+
+  createGameMachine(casinoName, number) {
+    if (isNaN(number)) {
+      throw new Error("Not valid sum of money");
+    }
+    if (this.money === 0) {
+      throw new Error("Not enough money to create machine");
+    } else if (this.money - number < 0) {
+      throw new Error("You don't have enough money to create this machine");
+    } else {
+      this.money -= number;
+      findCasino(this, casinoName).machines.push(new GameMachine(number));
+    }
+  }
+
+  getCasinoMoney(casinoName, number) {
+    if (isNaN(number)) {
+      throw new Error("Not valid sum of money");
+    }
+    let result = 0;
+    const casino = findCasino(this, casinoName);
+    //sort machines from biggest amount of money to smallest
+    let sortedMachines = casino.machines.sort(function(a, b) {
+      b.getMoney - a.getMoney;
+    });
+    //take money from all machines
+    for (const i of sortedMachines) {
+      try {
+        i.takeMachineMoney(number);
+        result += number;
+      } catch (error) {
+        //take all remaining money in machine if amount bigger
+        const currentBalance = i.getMoney;
+        i.takeMachineMoney(i.getMoney);
+        result += currentBalance;
+        console.log(
+          `${
+            error.message
+          } Program will take remaining amount - ${currentBalance}`
+        );
+      }
+    }
+    return result;
+  }
+
+  addMoney(number, machineNumber, casinoName) {
+    if (isNaN(number)) {
+      throw new Error("Not valid sum of money");
+    }
+    try {
+      let machine = findMachine(this, casinoName, machineNumber);
+      machine.putMoney(number);
+      return machine;
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  deleteMachine(index) {
+    if (index === 0 || isNaN(index)) {
+      throw new Error("Not valid number of game machine");
     }
 
-    createCasino(name) {
-        this.casinos.push(new Casino(name));
-    }
+    const casino = findCasino(this, casinoName);
+    const machine = findMachine(this, casino.name, index);
 
-    createGameMachine(index, number) {
-        if (this.money === 0) {
-            throw 'Not enough money to create machine';
-        } else if ((this.money - number) < 0) {
-            //TODO: notification
-            throw 'Not enough money to create machine.'
-        } else {
-            this.casinos[index].machines.push(new GameMachine(number));
+    if (typeof machine === "undefined") {
+      throw new Error("Game machine does not exists");
+    } else {
+      //machines array of current casino
+      const gameMachines = casino.machines;
+      //amount to take from deleted machine
+      const moneyAmount = machine.getMoney;
+
+      machine.takeMachineMoney(moneyAmount);
+
+      //count from 1
+      gameMachines.splice(index - 1, 1);
+      //split money among the rest of machines
+      for (const machine of gameMachines) {
+        try {
+          machine.putMoney(Math.round(moneyAmount / casino.getMachineCount));
+        } catch (error) {
+          console.log(error.message);
         }
+      }
     }
-
-    getCasinoMoney(index, number) {
-        let result = 0;
-        if (index === 0 || typeof (index) === "undefined" || isNaN(index)) {
-            throw 'Not valid number of game machine';
-        }
-
-        if (this.casinos[index - 1] === 'undefined') {
-            throw 'Such casino does not exist'
-        } else {
-            let sortedMachines = this.casinos[index].machines.sort(function (a, b) {
-                b.getMoney - a.getMoney
-            })
-
-            for (const i of sortedMachines) {
-                //take all remaining amount if number argument bigger
-                if ((i.number - number) < 0) {
-                    i.number -= i.getMoney;
-                    result += i.getMoney;
-                } else {
-                    i.number -= number;
-                    result += number;
-                }
-            }
-            return result;
-        }
-    }
-
-    //TODO
-    addCasinoMoney(index, number) {
-
-    }
-
-    deleteMachine(index) {
-        if (index === 0 || typeof (index) === "undefined" || isNaN(index)) {
-            throw 'Not valid number of game machine';
-        }
-
-        if (typeof this.casinos[0].machines[index - 1] === 'undefined') {
-            throw 'Game machine does not exist';
-        } else {
-            //machines array of current casino
-            const gameMachines = this.casinos[0].machines;
-            //amount to take from deleted machine
-            const moneyAmount = gameMachines[index - 1].getMoney;
-
-            gameMachines[index - 1].takeMachineMoney(moneyAmount);
-
-            //count from 1 
-            gameMachines.splice(index - 1, 1);
-            //split money among the rest of machines
-            for (const machine of gameMachines) {
-                machine.putMoney(moneyAmount / this.casinos[0].getMachineCount)
-            }
-        }
-    }
+  }
 }
